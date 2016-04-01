@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+	<title><%= content_for?(:title) ? yield(:title) : "Magazine" %></title>
+
+	<%= stylesheet_link_tag    "application" %>
+	<%= javascript_include_tag "application", 'data-turbolinks-track' => true %>
+	<%= csrf_meta_tags %>
+</head>
+
+<body>
+	<div class="top-bar">
+		<div class="top-bar-left">
+			<ul class="menu accordion-menu" data-responsive-menu="accordion" role="tablist" aria-multiselectable="true" data-accordionmenu="fxsjjt-accordionmenu" data-responsivemenu="xcm2pa-responsivemenu">
+				<li class="menu-text" role="menuitem">Magazine</li>
+				<%if user_signed_in? %>
+				<li>Welcome <%= current_user.first_name%></li>
+				<%end%>
+			</ul>
+		</div>
+		<div class="top-bar-right">
+			<ul class="menu">
+				<%if user_signed_in? %>
+				<li>
+					<%= link_to "Home", root_path %>
+				</li>
+				<%if current_user.articles.count > 0 %><li>
+				<%= link_to "My article", articles_path %>
+			</li><%end%>
+			<li><%= link_to "New Article", new_article_path %></li>
+			<li>
+				<%= link_to('Logout', destroy_user_session_path, :method => :delete) %>
+			</li>
+			<% else %>
+			<li>
+				<%= link_to "Home", root_path %>
+			</li><li>
+			<%= link_to('Login', new_user_session_path) %>
+		</li>
+		<% end %>
+	</ul>
+</div>
+</div>
+<div class="callout large primary">
+	<div class="row column text-center">
+		<h1>Our Articles</h1>
+	</div>
+</div>
+<% flash.each do |key, value| %>
+<div class= "alert-box <%= key %> radius" >
+	<%= value %>
+</div><%end%>
+<div class="row" id="content">
+	<div class="medium-8 columns">
+		<%= yield %>
+	</div>
+	<div class="medium-3 columns sticky-container" data-sticky-container="" style="height: 318px;">
+		<div class="sticky is-anchored is-at-top" data-sticky="d81826-sticky" data-anchor="content" data-resize="tv4era-sticky" data-events="resize" style="max-width: 285px; margin-top: 0px; top: 0px; bottom: 1966px;">
+			<h4>Categories</h4>
+			<ul>
+				<li><a href="#">WIP</a></li>
+			</ul>
+			<h4>Authors</h4>
+			<ul>
+				<li><a href="#">WIP</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+</body>
+</html>

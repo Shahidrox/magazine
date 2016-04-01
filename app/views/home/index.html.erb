@@ -1,0 +1,163 @@
+<% if !@artlicles.present? %>
+  <p>Be first to write a articles</p>
+<% end %>
+<% @artlicles.each do |art| %>
+<div class="blog-post">
+	<h3><%= art.title %> <small> <%= art.created_at.strftime("%d %b. %Y") %></small></h3>
+	<p><%= art.body %></p>
+	<div class="callout">
+		<ul class="menu simple">
+			<li><a href="#">Author: <%= art.user.first_name%></a></li>
+			<li><a href="#">Comments: <%= art.comments.count%></a></li>
+			<li><a id="add_button_<%= art.id %>">Add Comment</a></li>
+		</ul>
+	</div>
+</div>
+<div id="showHide_<%= art.id %>" style="display: none">
+  <% if user_signed_in? %>
+    <%= form_for [art, art.comments.build] do |f|%>
+      <%= f.hidden_field :user_id, :value => current_user.id %>
+      <%= f.text_area :body %>
+      <%= f.submit %>
+    <% end %>
+  <%else%>
+    <p>Please login to write comment</p>  
+  <%end%>
+</div>
+<script type="text/javascript">
+    $("#add_button_<%=art.id %>").click(function(){
+      $("#showHide_<%= art.id %>").toggle();
+    });
+
+</script>
+<% @cmt = art.comments.order("created_at DESC") %>
+<%if art.comments.count > 0 %>
+  <% @cmt.each do |f|%>
+    <div class="nav_section">
+      <div class="inner">
+        <div id="comments">
+          <div class="comment">
+            <div class="avatar">
+              <img alt="Avatar" height="64" src="http://railscasts.com/assets/guest.png" width="64">
+            </div>
+            <div class="actions user_actions">
+            </div>
+            <div class="main">
+              <div class="headline">
+                <span class="name"><a href="#"><%= f.user.first_name %></a></span>
+                <a href="#" class="created_at"><%= f.created_at.strftime("%b %d, %Y")%></a>
+                <a id="add_buttonSb_<%= f.id %>" style="float: right;"> Reply</a> 
+                <% if f.user == current_user && f.sub_comments.count <= 0 %>
+                  <span style="float: right;">
+                    <%= link_to 'delete', [f.article, f], method: :delete, data: {confirm: 'are you sure?'} %> | 
+                  </span>
+                <%end%>
+              </div>
+              <div class="comment_content">
+                <p><%= f.body%></p>
+                <div class="actions"></div>
+              </div>
+            </div>
+            <div class="clear"></div>
+            <div id="showHideSub_<%= f.id %>" style="display: none">
+              <% if user_signed_in? %>
+              <%= form_for [art, f, f.sub_comments.build] do |f| %>
+                <%= f.hidden_field :user_id, :value => current_user.id %>
+                <%= f.text_area :body %>
+                <%= f.submit %>
+              <%end %> 
+              <%else%>
+    <p>Please login to write comment</p>  
+  <%end%>
+          </div>
+          <script type="text/javascript">
+              $("#add_buttonSb_<%=f.id %>").click(function(){
+                $("#showHideSub_<%=f.id %>").toggle();
+              });
+
+          </script>
+          </div>
+          <%if f.sub_comments.count > 0 %>
+            <%f.sub_comments.each do |sc| %>
+              <% if sc.body.present?%>
+              <div class="nested_comments">
+                <div class="comment">
+                  <div class="avatar">
+                    <img alt="Avatar" height="64" src="http://railscasts.com/assets/guest.png" width="64">
+                  </div>
+                  <div class="actions user_actions"></div>
+                  <div class="main">
+                    <div class="headline">
+                      <span class="name"><a href="#"><%= sc.user.first_name %></a></span>
+                      <a href="#" class="created_at"><%= sc.created_at.strftime("%b %d, %Y")%></a>
+                      <a id="add_buttonSbO_<%= sc.id %>" style="float: right;"> Reply</a>
+                      <% if sc.user == current_user && sc.sub_one_comments.count <= 0 %>
+                        <span style="float: right;">
+                          <%= link_to 'delete', [f.article, sc.comment, sc], method: :delete, data: {confirm: 'are you sure?'} %> | 
+                        </span>
+                      <%end%>
+                    </div>
+                    <div class="comment_content">
+                      <p><%= sc.body%></p>
+                      <div class="actions"></div>
+                    </div>
+                  </div>
+                  <div class="clear"></div>
+                </div>
+                <div id="showHideSubO_<%= sc.id %>" style="display: none">
+                    <% if user_signed_in? %>
+                    <%= form_for [art, f, sc, sc.sub_one_comments.build] do |f| %>
+                      <%= f.hidden_field :user_id, :value => current_user.id %>
+                      <%= f.text_area :body %>
+                      <%= f.submit %>
+                    <%end %> 
+                    <%else%>
+    <p>Please login to write comment</p>  
+  <%end%>
+                </div>
+                <script type="text/javascript">
+                    $("#add_buttonSbO_<%=sc.id %>").click(function(){
+                      $("#showHideSubO_<%=sc.id %>").toggle();
+                    });
+
+                </script>
+                <%if sc.sub_one_comments.count > 0 %>
+                  <% sc.sub_one_comments.each do |sco|%>
+                    <% if sco.body.present?%>
+                    <div class="nested_comments">
+                      <div class="comment">
+                      <div class="avatar">
+                        <img alt="Avatar" height="64" src="http://railscasts.com/assets/guest.png" width="64">
+                      </div>
+                      <div class="actions user_actions"></div>
+                      <div class="main">
+                        <div class="headline">
+                          <span class="name"><a href="#"><%= sco.user.first_name%></a></span>
+                          <a href="#" class="created_at"><%= sco.created_at.strftime("%b %d, %Y")%></a>
+                          <% if sco.user == current_user%>
+                            <span style="float: right;">
+                              <%= link_to 'delete', [f.article, sc.comment, sco.sub_comment, sco], method: :delete, data: {confirm: 'are you sure?'} %>
+                            </span>
+                          <%end%>
+                        </div>
+                        <div class="comment_content">
+                          <p><%= sco.body%></p>
+                          <div class="actions"></div>
+                        </div>
+                      </div>
+                      <div class="clear"></div>
+                    </div>
+                    </div>
+                    <%end%>
+                  <%end%>  
+                <%end%>
+              </div>
+              <%end%>
+            <% end %> 
+          <% end %>
+        </div>
+      </div>
+    </div>
+   <% end %> 
+<% end %>
+<%end%>
